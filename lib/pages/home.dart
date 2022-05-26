@@ -91,7 +91,8 @@ class _HomePageState extends State<HomePage> {
     return Dismissible(
       key: Key(band.id),
       direction: DismissDirection.startToEnd,
-      onDismissed: (direction) {},
+      confirmDismiss: (direction) => promptDeleteBand(band),
+      onDismissed: (direction) => deleteBand(band.id),
       background: Container(
         padding: const EdgeInsets.only(left: 20.0),
         color: Colors.red,
@@ -178,5 +179,66 @@ class _HomePageState extends State<HomePage> {
       socketService.emit('add-band', {'name': name});
     }
     Navigator.pop(context);
+  }
+
+  Future<bool> promptDeleteBand(Band band) async {
+    bool willDelete = false;
+
+    if (Platform.isAndroid) {
+      await showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text(
+              'Are you sure you want to delete ${band.name} from your list?'),
+          content: const Text('This action can\'t be undone'),
+          actions: [
+            MaterialButton(
+              child: const Text('Delete'),
+              elevation: 5,
+              textColor: Colors.red,
+              onPressed: () {
+                willDelete = true;
+                Navigator.pop(context);
+              },
+            ),
+            MaterialButton(
+              child: const Text('Cancel'),
+              elevation: 5,
+              textColor: Colors.blue,
+              onPressed: () => Navigator.pop(context),
+            ),
+          ],
+        ),
+      );
+    } else {
+      await showCupertinoDialog(
+        context: context,
+        builder: (context) => CupertinoAlertDialog(
+          title: const Text('Are you sure?'),
+          content: const Text('This action can\'t be undone'),
+          actions: [
+            CupertinoDialogAction(
+              isDestructiveAction: true,
+              child: const Text('Delete'),
+              onPressed: () {
+                willDelete = true;
+                Navigator.pop(context);
+              },
+            ),
+            CupertinoDialogAction(
+              isDefaultAction: true,
+              child: const Text('Cancel'),
+              onPressed: () => Navigator.pop(context),
+            ),
+          ],
+        ),
+      );
+    }
+    return willDelete;
+  }
+
+  void deleteBand(String id) {
+    final socketService = Provider.of<SocketService>(context, listen: false);
+    socketService.emit('delete-band', {'id': id});
   }
 }
