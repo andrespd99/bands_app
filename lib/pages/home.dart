@@ -157,14 +157,14 @@ class _HomePageState extends State<HomePage> {
           ),
           actions: [
             CupertinoDialogAction(
+              isDestructiveAction: true,
+              child: const Text('Close'),
+              onPressed: () => Navigator.pop(context),
+            ),
+            CupertinoDialogAction(
               isDefaultAction: true,
               child: const Text('Add'),
               onPressed: () => addNewBand(controller.text),
-            ),
-            CupertinoDialogAction(
-              isDestructiveAction: true,
-              child: const Text('Dismiss'),
-              onPressed: () => Navigator.pop(context),
             ),
           ],
         ),
@@ -174,12 +174,8 @@ class _HomePageState extends State<HomePage> {
 
   void addNewBand(String name) {
     if (name.length > 1) {
-      bands.add(Band(
-        id: DateTime.now().toUtc().toString(),
-        name: name,
-        votes: 0,
-      ));
-      setState(() {});
+      final socketService = Provider.of<SocketService>(context, listen: false);
+      socketService.emit('add-band', {'name': name});
     }
     Navigator.pop(context);
   }
