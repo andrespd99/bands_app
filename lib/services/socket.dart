@@ -12,34 +12,35 @@ enum ServerStatus {
 
 class SocketService with ChangeNotifier {
   late ServerStatus _serverStatus = ServerStatus.connecting;
+  late IO.Socket _socket;
 
   ServerStatus get serverStatus => _serverStatus;
+  IO.Socket get socket => _socket;
+
+  Function get emit => _socket.emit;
 
   SocketService() {
     _initConfig();
   }
 
   void _initConfig() {
-    IO.Socket socket = IO.io('http://172.16.0.60:3000', {
+    _socket = IO.io('http://172.16.0.60:3000', {
       'transports': ['websocket'],
       'autoConnect': true,
     });
 
-    socket.onConnect((_) {
+    _socket.onConnect((_) {
       _serverStatus = ServerStatus.online;
       notifyListeners();
     });
 
-    socket.on('event', (data) => log(data));
-    socket.on('fromServer', (_) => log(_));
-
-    socket.onDisconnect((data) {
+    _socket.onDisconnect((data) {
       _serverStatus = ServerStatus.offline;
       notifyListeners();
     });
 
-    socket.on('new-message', (data) {
-      log('New message: ${data['message']}');
-    });
+    // socket.on('new-message', (data) {
+    //   log('New message: ${data['message']}');
+    // });
   }
 }

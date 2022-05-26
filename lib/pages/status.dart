@@ -23,6 +23,15 @@ class _StatusPageState extends State<StatusPage> {
           ],
         ),
       ),
+      floatingActionButton: FloatingActionButton(
+        child: Icon(Icons.message),
+        onPressed: () {
+          socketService.emit('emit-message', {
+            'name': 'Andres - Flutter',
+            'message': 'Hola desde Flutter',
+          });
+        },
+      ),
     );
   }
 }
