@@ -49,10 +49,11 @@ class _HomePageState extends State<HomePage> {
       body: Column(
         children: [
           bandsChart(),
-          ListView.builder(
-            shrinkWrap: true,
-            itemCount: bands.length,
-            itemBuilder: (context, i) => _bandTile(bands[i]),
+          Expanded(
+            child: ListView.builder(
+              itemCount: bands.length,
+              itemBuilder: (context, i) => _bandTile(bands[i]),
+            ),
           ),
         ],
       ),
