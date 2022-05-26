@@ -1,11 +1,15 @@
 import 'dart:io';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:provider/provider.dart';
 
 import 'package:bands_app/models/band.dart';
+import 'package:bands_app/services/socket.dart';
 
 class HomePage extends StatefulWidget {
+  static String routeName = 'home';
+
   HomePage({Key? key}) : super(key: key);
 
   @override
@@ -35,6 +39,21 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  Icon serverStatusIcon() {
+    final status = Provider.of<SocketService>(context).serverStatus;
+
+    switch (status) {
+      case ServerStatus.connecting:
+        return const Icon(Icons.offline_bolt, color: Colors.grey);
+      case ServerStatus.online:
+        return Icon(Icons.check_circle, color: Colors.greenAccent.shade400);
+      case ServerStatus.offline:
+        return Icon(Icons.offline_bolt, color: Colors.red.shade300);
+      default:
+        return const Icon(Icons.offline_bolt, color: Colors.grey);
+    }
+  }
+
   AppBar _appBarWidget() {
     return AppBar(
       title: const Text(
@@ -43,6 +62,12 @@ class _HomePageState extends State<HomePage> {
       ),
       elevation: 0,
       backgroundColor: Colors.white,
+      actions: [
+        Container(
+          margin: const EdgeInsets.only(right: 10.0),
+          child: serverStatusIcon(),
+        ),
+      ],
     );
   }
 

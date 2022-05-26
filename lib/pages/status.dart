@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class StatusPage extends StatefulWidget {
+  static String routeName = 'status';
+
   StatusPage({Key? key}) : super(key: key);
 
   @override

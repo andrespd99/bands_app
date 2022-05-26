@@ -14,8 +14,13 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => SocketService()),
       ],
       child: MaterialApp(
+        debugShowCheckedModeBanner: false,
         title: 'Band App',
-        home: StatusPage(),
+        initialRoute: HomePage.routeName,
+        routes: {
+          HomePage.routeName: (_) => HomePage(),
+          StatusPage.routeName: (_) => StatusPage(),
+        },
       ),
     );
   }
