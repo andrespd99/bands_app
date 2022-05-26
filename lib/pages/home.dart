@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -17,16 +18,29 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  List<Band> bands = [
-    Band(id: '1', name: 'Metallica', votes: 0),
-    Band(id: '2', name: 'Iron Maiden', votes: 0),
-    Band(id: '3', name: 'AC/DC', votes: 0),
-    Band(id: '4', name: 'Nirvana', votes: 0),
-    Band(id: '5', name: 'Pink Floyd', votes: 0),
-    Band(id: '6', name: 'The Beatles', votes: 0),
-    Band(id: '7', name: 'The Rolling Stones', votes: 0),
-    Band(id: '8', name: 'The Who', votes: 0),
-  ];
+  List<Band> bands = [];
+
+  @override
+  void initState() {
+    final socketService = Provider.of<SocketService>(context, listen: false);
+
+    socketService.socket.on('active-bands', (data) {
+      log(data.toString());
+      bands = List.from(data).map((obj) => Band.fromMap(obj)).toList();
+
+      setState(() {});
+    });
+
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    final socketService = Provider.of<SocketService>(context, listen: false);
+    socketService.socket.off('active-bands');
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
