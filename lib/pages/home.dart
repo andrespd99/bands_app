@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 
 import 'package:bands_app/models/band.dart';
 import 'package:bands_app/services/socket.dart';
+import 'package:syncfusion_flutter_charts/charts.dart';
 
 class HomePage extends StatefulWidget {
   static String routeName = 'home';
@@ -24,12 +25,7 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     final socketService = Provider.of<SocketService>(context, listen: false);
 
-    socketService.socket.on('active-bands', (data) {
-      log(data.toString());
-      bands = List.from(data).map((obj) => Band.fromMap(obj)).toList();
-
-      setState(() {});
-    });
+    socketService.socket.on('active-bands', _handleActiveBands);
 
     super.initState();
   }
@@ -41,15 +37,56 @@ class _HomePageState extends State<HomePage> {
     super.dispose();
   }
 
+  _handleActiveBands(dynamic data) {
+    bands = List.from(data).map((obj) => Band.fromMap(obj)).toList();
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: _appBarWidget(),
-      body: ListView.builder(
-        itemCount: bands.length,
-        itemBuilder: (context, i) => _bandTile(bands[i]),
+      body: Column(
+        children: [
+          bandsChart(),
+          ListView.builder(
+            shrinkWrap: true,
+            itemCount: bands.length,
+            itemBuilder: (context, i) => _bandTile(bands[i]),
+          ),
+        ],
       ),
       floatingActionButton: _floatingActionButtonWidget(),
+    );
+  }
+
+  SfCircularChart bandsChart() {
+    return SfCircularChart(
+      series: [
+        PieSeries<Band, String>(
+          dataSource: bands,
+          dataLabelMapper: (band, i) => band.name,
+          dataLabelSettings: const DataLabelSettings(
+            isVisible: true,
+            labelPosition: ChartDataLabelPosition.inside,
+            connectorLineSettings: ConnectorLineSettings(
+              color: Colors.white,
+              width: 1,
+            ),
+          ),
+          xValueMapper: (Band band, _) => band.name,
+          yValueMapper: (Band band, _) => band.votes,
+        ),
+      ],
+      legend: Legend(
+        isVisible: true,
+        overflowMode: LegendItemOverflowMode.wrap,
+        position: LegendPosition.right,
+        alignment: ChartAlignment.center,
+        textStyle: const TextStyle(
+          fontWeight: FontWeight.bold,
+        ),
+      ),
     );
   }
 
@@ -119,13 +156,11 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  FloatingActionButton _floatingActionButtonWidget() {
-    return FloatingActionButton(
-      child: const Icon(Icons.add),
-      onPressed: promptAddBand,
-      elevation: 1,
-    );
-  }
+  FloatingActionButton _floatingActionButtonWidget() => FloatingActionButton(
+        child: const Icon(Icons.add),
+        onPressed: promptAddBand,
+        elevation: 1,
+      );
 
   void promptAddBand() {
     final controller = TextEditingController();
